@@ -7,22 +7,22 @@
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
+        
+        /* Tüm ekranı kaplayan ve dokunulabilir siyah perde */
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); display: flex;
             justify-content: center; align-items: center; z-index: 9999;
-        }
-        #startButton {
-            padding: 20px 40px; font-size: 20px; background: #e62117;
-            color: white; border: none; border-radius: 10px; cursor: pointer;
+            color: white; font-size: 24px; font-weight: bold;
+            cursor: pointer; text-align: center;
         }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <button id="startButton">Deneyimi Başlat</button>
+        BAŞLAMAK İÇİN EKRANA DOKUNUNUZ
     </div>
 
     <a-scene mindar-image="imageTargetSrc: ./resim_video/targets.mind;" 
@@ -46,19 +46,26 @@
     </a-scene>
 
     <script>
-        const startButton = document.querySelector("#startButton");
         const overlay = document.querySelector("#overlay");
         const video = document.querySelector("#arVideo");
 
-        startButton.addEventListener('click', () => {
+        // Kullanıcı ekranda herhangi bir yere dokunduğunda çalışır
+        overlay.addEventListener('click', () => {
             video.play();
-            video.pause();
-            overlay.style.display = "none";
+            video.pause(); // Tarayıcı kilidini açmak için oynat-durdur taktiği
+            overlay.style.display = "none"; // Siyah ekranı gizle
         });
 
+        // Kamerada hedef resim (Atatürk) bulunduğunda videoyu oynat
         const targetEntity = document.querySelector('[mindar-image-target]');
-        targetEntity.addEventListener("targetFound", () => { video.play(); });
-        targetEntity.addEventListener("targetLost", () => { video.pause(); });
+        targetEntity.addEventListener("targetFound", () => { 
+            video.play(); 
+        });
+        
+        // Kamera resimden uzaklaştığında videoyu duraklat
+        targetEntity.addEventListener("targetLost", () => { 
+            video.pause(); 
+        });
     </script>
 </body>
 </html>
