@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>19 Mayıs AR - Tam Ekran</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        /* Video için bir 'Başlat' butonu (Mobil tarayıcı kısıtlamaları için) */
-        #ui { position: fixed; z-index: 1000; bottom: 20px; left: 50%; transform: translateX(-50%); }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 10px; border: none; background: #e62117; color: white; }
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex;
+            justify-content: center; align-items: center; z-index: 9999;
+        }
+        #startButton {
+            padding: 20px 40px; font-size: 20px; background: #e62117;
+            color: white; border: none; border-radius: 10px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div id="ui">
+    <div id="overlay">
         <button id="startButton">Deneyimi Başlat</button>
     </div>
 
-    <a-scene mindar-image="imageTargetSrc: ./resim_video/targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: ./resim_video/targets.mind;" 
+             color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
         <a-assets>
             <video id="arVideo" src="./resim_video/19mayis1.mp4" preload="auto" loop="true" crossorigin="anonymous" playsinline webkit-playsinline></video>
@@ -26,30 +36,29 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-video src="#arVideo" width="1" height="0.55" position="0 0 0" rotation="0 0 0"></a-video>
+            <a-video src="#arVideo" 
+                     width="1" 
+                     height="0.75" 
+                     position="0 0 0" 
+                     rotation="0 0 0">
+            </a-video>
         </a-entity>
     </a-scene>
 
     <script>
         const startButton = document.querySelector("#startButton");
+        const overlay = document.querySelector("#overlay");
         const video = document.querySelector("#arVideo");
-        const ui = document.querySelector("#ui");
 
-        // Mobil tarayıcılarda videoların otomatik oynatılması için kullanıcı etkileşimi şarttır
         startButton.addEventListener('click', () => {
             video.play();
-            video.pause(); // İlk başta videoyu "hazır" hale getiriyoruz
-            ui.style.display = "none";
+            video.pause();
+            overlay.style.display = "none";
         });
 
-        // Resim bulunduğunda videoyu oynat, kaybedildiğinde duraklat
         const targetEntity = document.querySelector('[mindar-image-target]');
-        targetEntity.addEventListener("targetFound", event => {
-            video.play();
-        });
-        targetEntity.addEventListener("targetLost", event => {
-            video.pause();
-        });
+        targetEntity.addEventListener("targetFound", () => { video.play(); });
+        targetEntity.addEventListener("targetLost", () => { video.pause(); });
     </script>
 </body>
 </html>
