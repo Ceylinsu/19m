@@ -3,73 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>19 Mayıs AR - Otomatik Başlat</title>
+    <title>19 Mayıs AR - Kesintisiz</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        /* Yükleniyor yazısı (Sistem açılana kadar kullanıcıya bilgi verir) */
-        #loading {
+        #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; display: flex; justify-content: center;
-            align-items: center; z-index: 9999; font-family: sans-serif;
+            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+            color: white; font-family: sans-serif;
+        }
+        #startButton {
+            padding: 20px 40px; font-size: 20px; background: #e62117;
+            color: white; border: none; border-radius: 50px; cursor: pointer;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div id="loading">Sistem Hazırlanıyor...</div>
+    <div id="overlay">
+        <button id="startButton">DENEYİMİ BAŞLAT</button>
+        <p>Lütfen kamera izni verin ve resme odaklanın.</p>
+    </div>
 
-    <a-scene mindar-image="imageTargetSrc: ./resim_video/targets.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: yes;" 
+    <a-scene mindar-image="imageTargetSrc: ./resim_video/targets.mind; autoStart: true; maxTrack: 1" 
              color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
              vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
         <a-assets>
-            <video id="arVideo" 
-                   src="./resim_video/19mayis1.mp4" 
-                   preload="auto" 
-                   loop="true" 
-                   crossorigin="anonymous" 
-                   playsinline 
-                   webkit-playsinline 
-                   muted>
-            </video>
+            <video id="arVideo" src="./resim_video/19mayis1.mp4" 
+                   preload="auto" loop="true" crossorigin="anonymous" 
+                   playsinline webkit-playsinline muted></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity id="targetEntity" mindar-image-target="targetIndex: 0">
-            <a-video src="#arVideo" 
-                     width="1" 
-                     height="0.75" 
-                     position="0 0 0" 
-                     rotation="0 0 0">
-            </a-video>
+        <a-entity id="mytarget" mindar-image-target="targetIndex: 0">
+            <a-video src="#arVideo" width="1" height="0.75" position="0 0 0"></a-video>
         </a-entity>
     </a-scene>
 
     <script>
+        const startButton = document.querySelector("#startButton");
+        const overlay = document.querySelector("#overlay");
         const video = document.querySelector("#arVideo");
-        const loading = document.querySelector("#loading");
         const sceneEl = document.querySelector('a-scene');
 
-        // Sahne yüklendiğinde "Sistem Hazırlanıyor" yazısını kaldır
-        sceneEl.addEventListener("ready", () => {
-            loading.style.display = "none";
+        // Butona basıldığında yapılacaklar
+        startButton.addEventListener('click', () => {
+            // Videoyu "uyandır" ve oynat (sessiz olduğu için kesin oynar)
+            video.play().then(() => {
+                console.log("Video başarıyla başlatıldı.");
+            }).catch(err => {
+                console.error("Video başlatılamadı:", err);
+            });
+            
+            overlay.style.display = "none";
         });
 
-        const targetEntity = document.querySelector('#targetEntity');
+        // Sesini açmak isterseniz bu kısmı kullanabilirsiniz
+        // Ekrana tıklandığında videonun sesini açar
+        document.body.addEventListener('click', () => {
+            video.muted = false;
+        });
 
-        // Resim bulunduğu an video direkt oynar (çünkü muted: true)
+        const targetEntity = document.querySelector('#mytarget');
+        
         targetEntity.addEventListener("targetFound", () => {
+            console.log("Resim algılandı");
             video.play();
         });
 
-        // Resim kaybolduğunda video durur
         targetEntity.addEventListener("targetLost", () => {
-            video.pause();
+            console.log("Resim kayboldu");
+            // İstersen durdurabilirsin, istersen devam eder
+            // video.pause(); 
         });
     </script>
 </body>
 </html>
- 
